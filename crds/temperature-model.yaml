@@ -1,0 +1,20 @@
+apiVersion: devices.kubeedge.io/v1beta1
+kind: DeviceModel
+metadata:
+  name: temperature-model
+  namespace: default
+spec:
+  protocol: modbus
+  properties:
+    - name: temperature
+      description: actual temperature *10 
+      type: INT
+      accessMode: ReadWrite
+      minimum: "0"  # actual 0.0 degree
+      maximum: "1000"  # actual 100.0 degree
+      unit: "Celsius" 
+    - name: temperature-enable
+      description: enable data collection of temperature
+      type:INT #ENUM: INT,FLOAT,DOUBLE,STRING,BOOLEAN,BYTES
+      accessMode: ReadWrite
+      defaultValue: 1
