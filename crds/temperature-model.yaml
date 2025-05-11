@@ -15,6 +15,5 @@ spec:
       unit: "Celsius" 
     - name: temperature-enable
       description: enable data collection of temperature
-      type:INT #ENUM: INT,FLOAT,DOUBLE,STRING,BOOLEAN,BYTES
+      type: INT  #ENUM: INT,FLOAT,DOUBLE,STRING,BOOLEAN,BYTES
       accessMode: ReadWrite
-      defaultValue: 1

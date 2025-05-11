@@ -1,11 +1,11 @@
 apiVersion: devices.kubeedge.io/v1beta1
-kind: DeviceInstance
+kind: Device
 metadata:
   name: temperature-instance
-  labels:
-  description: temperature sensor simulator
-  manufacturer: modbus slave
-  model: AA666
+  # labels:
+  # description: temperature sensor simulator
+  # manufacturer: modbus slave
+  # model: AA666
 spec:
   deviceModelRef:
     name: temperature-model
@@ -17,7 +17,7 @@ spec:
         mode: tcp
         ip: "127.0.0.1"
         port: "502"
-  nodeSelector: edge-node
+  nodeName: kind-worker # replace the nodeName with your edge node name
   properties:
     - name: temperature
       visitors:
@@ -38,13 +38,12 @@ spec:
           qos: 0
           address: "tcp://127.0.0.1:1883"
           retained: false
-
-    - propertyName: temperature-enable
-        desired:
-          value: "1"
-        visitors:
-          protocolName: modbus
-          configData:
+    - name: temperature-enable
+      desired:
+        value: "1"
+      visitors:
+        protocolName: modbus
+        configData:
           register: CoilRegister
           offset: 0
           limit: 1
@@ -56,13 +55,13 @@ status:
     - propertyName: temperature-enable
       reported:
         metadata:
-          timestamp: 1688663400
-          type: int
-        value: 1
+          timestamp: "1688663400"
+          type: "int"
+        value: "1"
       observedDesired:
         metadata:
-          timestamp: 1688663400
+          timestamp: "1688663400"
           type: int
-        value: 1
+        value: "1"
         
 

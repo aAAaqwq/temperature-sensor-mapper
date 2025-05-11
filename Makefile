@@ -32,3 +32,10 @@ $(make_rules):
 
 .DEFAULT_GOAL := help
 .PHONY: $(make_rules) build test package
+
+deploy:
+	kubectl apply -f ./crds/temperature-model.yaml
+	kubectl apply -f ./crds/temperature-instance.yaml
+	kubectl apply -f ./resouce/configmap.yaml
+	kubectl apply -f./resouce/deployment.yaml
+

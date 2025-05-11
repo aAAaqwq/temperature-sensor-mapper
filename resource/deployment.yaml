@@ -13,7 +13,7 @@ spec:
       labels:
         app: demo
     spec:
-      nodeName: # replace with your edge node name
+      nodeName: kind-worker # replace with your edge node name
       containers:
         - name: demo
           volumeMounts: # Required, mapper need to communicate with grpcclient and get the config
