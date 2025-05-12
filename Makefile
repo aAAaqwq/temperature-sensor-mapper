@@ -38,4 +38,9 @@ deploy:
 	kubectl apply -f ./crds/temperature-instance.yaml
 	kubectl apply -f ./resource/configmap.yaml
 	kubectl apply -f./resource/deployment.yaml
+undeploy:
+	kubectl delete -f./crds/temperature-model.yaml
+	kubectl delete -f./crds/temperature-instance.yaml
+	kubectl delete -f./resource/configmap.yaml
+	kubectl delete -f./resource/deployment.yaml
 

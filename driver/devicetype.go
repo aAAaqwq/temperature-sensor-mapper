@@ -44,11 +44,11 @@ type VisitorConfig struct {
 
 type VisitorConfigData struct {
 	// TODO: add your visitor config data
-	DataType string `json:"dataType"`
-	Register string `json:"register"`
-	Offset int `json:"offset"`
-	Scale float64 `json:"scale"`
-	IsSwap bool `json:"isSwap"`
-	Limit int `json:"limit"`
-	IsRegisterSwap bool `json:"isRegisterSwap"`
+	DataType string `json:"dataType"` // 数据类型:enum:Int/Float/String
+	Register string `json:"register"` // 寄存器类型:enum:CoilRegister/HoldingRegister
+	Offset int `json:"offset"`        // 寄存器偏移量
+	Scale float64 `json:"scale"`      // 数据缩放比例
+	IsSwap bool `json:"isSwap"`       // 是否交换字节
+	Limit int `json:"limit"`          // 读取数量
+	IsRegisterSwap bool `json:"isRegisterSwap"` // 是否交换寄存器
 }

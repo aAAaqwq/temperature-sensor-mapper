@@ -37,7 +37,11 @@ func main() {
 	if err != nil && !errors.Is(err, device.ErrEmptyData) {
 		klog.Fatal(err)
 	}
-	klog.Infoln("devInit finished")
+	if errors.Is(err, device.ErrEmptyData) {
+		klog.Infoln("devInit finished,but no device data")
+	}else{
+		klog.Infoln("devInit finished")
+	}
 	go panel.DevStart()
 
 	// start http server
