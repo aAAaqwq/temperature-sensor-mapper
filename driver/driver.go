@@ -1,6 +1,7 @@
 package driver
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/kubeedge/mapper-framework/pkg/common"
@@ -27,7 +28,7 @@ func (c *CustomizedClient) InitDevice() error {
 		DeviceIP: c.ConfigData.CommunicationMode.IP,
 		TCPPort:  c.ConfigData.CommunicationMode.Port,
 	}
-	klog.Info("Start InitDevice with config:",config)
+	klog.Infoln("Start InitDevice with config:",config)
 	modbusClient,err:=modbus.NewClient(config)
 	if err!=nil{
 		klog.Errorf("Failed to create Modbus client: %v", err)
@@ -40,7 +41,7 @@ func (c *CustomizedClient) InitDevice() error {
 		return err
 	}
 	c.ModbusClient=modbusClient
-	klog.Info("InitDevice success")
+	klog.Infoln("InitDevice success")
 	return nil
 }
 
@@ -56,13 +57,31 @@ func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, e
 func (c *CustomizedClient) DeviceDataWrite(visitor *VisitorConfig, deviceMethodName string, propertyName string, data interface{}) error {
 	// TODO: add the code to write device's data
 	// you can use c.ProtocolConfig and visitor to write data to device
+	c.deviceMutex.Lock()
+	defer c.deviceMutex.Unlock()
+
+	//转换uint16
+	value,ok:=data.(uint16)
+	if !ok{
+		klog.Errorf("Failed to convert data to uint16: %v", data)
+		return fmt.Errorf("Failed to convert data to uint16: %v", data)
+	}
+
+	//写入到设备的线圈
+	res,err:=c.ModbusClient.Set("CoilRegister",0,value)
+	if err!=nil{
+		klog.Errorf("Failed to write data to device: %v", err)
+		return err
+	}
+	klog.Infof("Write data to device success: %v", res)
+	
 	return nil
 }
 
 func (c *CustomizedClient) SetDeviceData(data interface{}, visitor *VisitorConfig) error {
 	// TODO: set device's data
 	// you can use c.ProtocolConfig and visitor
-	return nil
+	return c.DeviceDataWrite(visitor,"","",data)
 }
 
 func (c *CustomizedClient) StopDevice() error {
@@ -73,6 +92,7 @@ func (c *CustomizedClient) StopDevice() error {
 		klog.Errorf("Failed to close Modbus client: %v", err)
 		return err
 	}
+	
 	return nil
 }
 

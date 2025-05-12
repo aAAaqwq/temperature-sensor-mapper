@@ -55,8 +55,7 @@ git clone
 ### 3. 配置mapper插件
 ```
 - 配置/crds/temperature-instance.yaml
-- 配置/resource/deployment.yaml
-- 
+- 配置/resource/deployment.yaml 
 ```
 ### 4. 编译和构建mapper插件镜像
 ```

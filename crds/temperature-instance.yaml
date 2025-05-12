@@ -15,7 +15,7 @@ spec:
       slaveID: 1
       communication:
         mode: tcp
-        ip: "127.0.0.1"
+        ip: "192.168.25.239" # replace the ip with your imitation device ip
         port: "502"
   nodeName: kind-worker # replace the nodeName with your edge node name
   properties:
@@ -52,6 +52,17 @@ spec:
           isRegisterSwap: false
 status:
   twins:
+    - propertyName: temperature
+      reported:
+        metadata:
+          timestamp: "1688663455"
+          type: "int"
+        value: "250"
+      observedDesired:
+        metadata:
+          timestamp: "1688663455"
+          type: int
+        value: "250"
     - propertyName: temperature-enable
       reported:
         metadata:

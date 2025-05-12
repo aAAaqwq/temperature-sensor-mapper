@@ -36,6 +36,6 @@ $(make_rules):
 deploy:
 	kubectl apply -f ./crds/temperature-model.yaml
 	kubectl apply -f ./crds/temperature-instance.yaml
-	kubectl apply -f ./resouce/configmap.yaml
-	kubectl apply -f./resouce/deployment.yaml
+	kubectl apply -f ./resource/configmap.yaml
+	kubectl apply -f./resource/deployment.yaml
 

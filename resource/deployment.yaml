@@ -21,13 +21,13 @@ spec:
               mountPath: /etc/kubeedge
             - name: config
               mountPath: /tmp
-          env: # Not Required, this field is used to mount the user database key
-            - name: TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: mysecret
-                  key: token
-          image:  # Replace with your mapper image name
+          # env: # Not Required, this field is used to mount the user database key
+          #   - name: TOKEN
+          #     valueFrom:
+          #       secretKeyRef:
+          #         name: mysecret
+          #         key: token
+          image: aaqwqaa/temperature-mapper:v1.0 # Replace with your mapper image name
           imagePullPolicy: IfNotPresent
           resources:
             limits:
@@ -37,7 +37,7 @@ spec:
               cpu: 100m
               memory: 100Mi
           command: [ "/bin/sh","-c" ]
-          args: [ "/kubeedge/main --config-file /tmp/config.yaml --v 4" ]
+          args: [ "/kubeedge/main --config-file /tmp/config.yaml --v 5" ] 
       volumes:
         - name: test-volume
           hostPath:
