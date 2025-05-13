@@ -26,8 +26,8 @@ func (c *CustomizedClient) InitDevice() error {
 	//初始化modbus客户端
 	config := &modbus.ModbusTCP{
 		SlaveID:  byte(c.ConfigData.SlaveID),
-		DeviceIP: c.ConfigData.CommunicationMode.IP,
-		TCPPort:  c.ConfigData.CommunicationMode.Port,
+		DeviceIP: c.ConfigData.IP,
+		TCPPort:  c.ConfigData.Port,
 	}
 	klog.Infoln("Start InitDevice with config:", config)
 	modbusClient, err := modbus.NewClient(config)

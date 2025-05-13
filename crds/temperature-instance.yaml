@@ -13,11 +13,9 @@ spec:
     protocolName: modbus
     configData:
       slaveID: 1
-      communication:
-        mode: tcp
-        ip: "192.168.25.239" # replace the ip with your imitation device ip
-        port: "502"
-  nodeName: kind-worker # replace the nodeName with your edge node name
+      ip: "192.168.25.239" # replace the ip with your imitation device ip
+      port: "502"
+  nodeName: "kind-worker" # replace the nodeName with your edge node name
   properties:
     - name: temperature
       visitors:
