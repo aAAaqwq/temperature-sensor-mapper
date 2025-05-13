@@ -1,6 +1,7 @@
 package driver
 
 import (
+	"encoding/binary"
 	"fmt"
 	"sync"
 
@@ -50,7 +51,8 @@ func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, e
 	defer c.deviceMutex.Unlock()
 
 	klog.Infof("开始从设备读取数据，Register: %s, Offset: %d, Limit: %d", visitor.Register, visitor.Offset, visitor.Limit)
-	data, err := c.ModbusClient.Get(visitor.Register, uint16(visitor.Offset), uint16(visitor.Limit))
+	data, err := c.ModbusClient.Get(visitor.Register, visitor.Offset, visitor.Limit)
+	//返回的data是实际寄存器数据，每个寄存器占用2个字节
 	if err != nil {
 		klog.Errorf("从设备读取数据失败: %v", err)
 		return nil, err
@@ -60,26 +62,18 @@ func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, e
 	switch visitor.DataType {
 	case "int":
 		if len(data) > 0 {
-			value := int(data[0])
+			value := binary.BigEndian.Uint16(data)
 			if visitor.Scale != 0 {
-				value = int(float64(value) * visitor.Scale)
+				value = uint16(float64(value) * visitor.Scale)
 			}
 			klog.Infof("成功从设备读取并转换数据: %v", value)
 			return value, nil
 		}
 	case "float":
-		if len(data) > 0 {
-			value := float64(data[0])
-			if visitor.Scale != 0 {
-				value = value * visitor.Scale
-			}
-			klog.Infof("成功从设备读取并转换数据: %v", value)
-			return value, nil
-		}
 	default:
 		if len(data) > 0 {
-			klog.Infof("成功从设备读取数据: %v", data[0])
-			return data[0], nil
+			klog.Infof("成功从设备读取数据: %v", data)
+			return data, nil
 		}
 	}
 

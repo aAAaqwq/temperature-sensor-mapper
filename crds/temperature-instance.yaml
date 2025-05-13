@@ -23,7 +23,8 @@ spec:
       visitors:
         protocolName: modbus
         configData:
-          register: HoldingRegister
+          dataType: "int"
+          register: "HoldingRegister"
           offset: 0
           limit: 1
           scale: 1.0 # 温度值的缩放因子
@@ -44,7 +45,8 @@ spec:
       visitors:
         protocolName: modbus
         configData:
-          register: CoilRegister
+          dataType: "int"
+          register: "CoilRegister"
           offset: 0
           limit: 1
           scale: 1
@@ -61,7 +63,7 @@ status:
       observedDesired:
         metadata:
           timestamp: "1688663455"
-          type: int
+          type: "int"
         value: "250"
     - propertyName: temperature-enable
       reported:
@@ -72,7 +74,7 @@ status:
       observedDesired:
         metadata:
           timestamp: "1688663400"
-          type: int
+          type: "int"
         value: "1"
         
 
