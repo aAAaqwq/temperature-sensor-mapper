@@ -24,12 +24,16 @@ func (c *CustomizedClient) InitDevice() error {
 	// TODO: add init operation
 	// you can use c.ProtocolConfig
 	//初始化modbus客户端
-	config := &modbus.ModbusTCP{
+	config := modbus.ModbusTCP{
 		SlaveID:  byte(c.ConfigData.SlaveID),
 		DeviceIP: c.ConfigData.IP,
 		TCPPort:  c.ConfigData.Port,
+		// DeviceIP: "192.168.25.239",
+		// TCPPort:  "502",
+		Timeout: 10,
 	}
-	klog.Infoln("Start InitDevice with config:", config)
+	klog.Infoln("Start InitDevice with config:",config)
+	klog.Infoln("ConfigType:",fmt.Sprintf("%T",config))
 	modbusClient, err := modbus.NewClient(config)
 	if err != nil {
 		klog.Errorf("Failed to create Modbus client: %v", err)
