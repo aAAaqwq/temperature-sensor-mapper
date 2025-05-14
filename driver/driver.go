@@ -30,7 +30,6 @@ func (c *CustomizedClient) InitDevice() error {
 		TCPPort:  c.ConfigData.Port,
 		// DeviceIP: "192.168.25.239",
 		// TCPPort:  "502",
-		Timeout: 10,
 	}
 	klog.Infoln("Start InitDevice with config:",config)
 	klog.Infoln("ConfigType:",fmt.Sprintf("%T",config))
