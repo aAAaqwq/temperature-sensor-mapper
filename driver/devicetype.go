@@ -28,15 +28,18 @@ type ProtocolConfig struct {
 type ConfigData struct {
 	// TODO: add your protocol config data
 	SlaveID int `json:"slaveID,omitempty"` // 从站ID
-	IP      string `json:"ip,omitempty"`
-	Port    string `json:"port,omitempty"`
-}
-type CommunicationMode struct{
-	Mode string `json:"mode"`
+	Mode string `json:"mode"`   // 通信模式:enum:TCP/RTU
+	// TCP mode
 	IP string `json:"ip,omitempty"`
 	Port string `json:"port,omitempty"`
 	Timeout int `json:"timeout,omitempty"`
-	// Todo：add RTU mode
+	// RTU mode
+	SerialName string `json:"serialName,omitempty"` // 串口名称
+	BaudRate int `json:"baudRate,omitempty"`// 波特率
+	DataBits int `json:"dataBits,omitempty"`// 数据位
+	StopBits int `json:"stopBits,omitempty"`// 停止位
+	Parity string `json:"parity,omitempty"`// 校验位:enum:None/Even/Odd
+	RS485Enabled bool `json:"rs485Enabled,omitempty"`// 是否启用RS485
 }
 
 type VisitorConfig struct {

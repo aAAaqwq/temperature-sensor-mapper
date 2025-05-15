@@ -4,9 +4,10 @@ import (
 	"encoding/binary"
 	"fmt"
 	"sync"
-	"github.com/spf13/cast"
+
 	"github.com/kubeedge/mapper-framework/pkg/common"
 	"github.com/kubeedge/mappers-go/pkg/driver/modbus"
+	"github.com/spf13/cast"
 	"k8s.io/klog/v2"
 )
 
@@ -24,10 +25,27 @@ func (c *CustomizedClient) InitDevice() error {
 	// TODO: add init operation
 	// you can use c.ProtocolConfig
 	//初始化modbus客户端
-	config := modbus.ModbusTCP{
-		SlaveID:  byte(c.ConfigData.SlaveID),
-		DeviceIP: c.ConfigData.IP,
-		TCPPort:  c.ConfigData.Port,
+	var config interface{}
+	switch c.ProtocolConfig.Mode {
+	case "TCP":
+		config=modbus.ModbusTCP{
+			SlaveID:  byte(c.ConfigData.SlaveID),
+			DeviceIP: c.ConfigData.IP,
+			TCPPort:  c.ConfigData.Port,
+		}
+	case "RTU":
+		config=modbus.ModbusRTU{
+			SlaveID:  byte(c.ConfigData.SlaveID),
+			SerialName: c.ConfigData.SerialName,
+			BaudRate:  c.ConfigData.BaudRate,
+			DataBits:  c.ConfigData.DataBits,
+			StopBits:  c.ConfigData.StopBits,
+			Parity:    c.ConfigData.Parity,
+			RS485Enabled: c.ConfigData.RS485Enabled,
+		}
+	default:
+		klog.Errorf("Invalid protocol mode: %s", c.ProtocolConfig.Mode)
+		return fmt.Errorf("invalid protocol mode: %s", c.ProtocolConfig.Mode)
 	}
 	klog.Infoln("Start InitDevice with config:",config)
 	klog.Infoln("ConfigType:",fmt.Sprintf("%T",config))
@@ -42,11 +60,11 @@ func (c *CustomizedClient) InitDevice() error {
 		c.StopDevice() // 关闭客户端释放资源
 		return err
 	}
-	c.ModbusClient = modbusClient
 	klog.Infoln("InitDevice success")
 	return nil
 }
 
+// GetDeviceData 获取设备数据并转换类型输出
 func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, error) {
 	c.deviceMutex.Lock()
 	defer c.deviceMutex.Unlock()
@@ -58,26 +76,34 @@ func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, e
 		klog.Errorf("从设备读取数据失败: %v", err)
 		return nil, err
 	}
+	// 根据每2个字节1个uint16数据,依次转换
+	n:=len(data)/2
+	value := make([]uint16, n)
+	for i:=0;i<n;i+=2 {
+		value[i] = binary.BigEndian.Uint16(data[i:i+2])
+	}
 	
 	// 根据数据类型进行转换
 	switch visitor.DataType {
-	case "int":
-		if len(data) > 0 {
-			value := binary.BigEndian.Uint16(data)
-			if visitor.Scale != 0 {
-				value = uint16(float64(value) * visitor.Scale)
+	case "uint8","uint16","uint32","uint64","uint","int8","int","int16","int32","int64":
+		return cast.ToIntSlice(value),nil
+	case "string":
+		return cast.ToStringSlice(value),nil
+	case "float32","float64":
+		v:=cast.ToFloat64Slice(value)
+		// 缩放
+		if visitor.Scale != 0 {
+			for i:=0;i<len(v);i++ {
+				v[i] = v[i] * visitor.Scale
 			}
-			klog.Infof("成功从设备读取并转换数据: %v", value)
-			return value, nil
 		}
-	case "float":
+		return v,nil
 	default:
 		if len(data) > 0 {
-			klog.Infof("成功从设备读取数据: %v", data)
-			return data, nil
+			klog.Infof("成功从设备读取数据: %v", value)
+			return value, nil
 		}
 	}
-
 	return nil, fmt.Errorf("无效的数据或数据类型: %v", visitor.DataType)
 }
 

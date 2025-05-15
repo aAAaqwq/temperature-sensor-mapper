@@ -13,6 +13,7 @@ spec:
   protocol:
     protocolName: modbus
     configData:
+      mode: "TCP"  #TCP/RTU
       port: "502"
       slaveID: 1
       ip: "192.168.25.239"   # replace the ip with your imitation device ip
@@ -23,7 +24,7 @@ spec:
       visitors:
         protocolName: modbus
         configData:
-          # dataType: "uint16"
+          dataType: "uint16"
           register: "HoldingRegister"
           offset: 0
           limit: 1
@@ -45,7 +46,7 @@ spec:
       visitors:
         protocolName: modbus
         configData:
-          # dataType: "uint16"
+          dataType: "uint16"
           register: "CoilRegister"
           offset: 0
           limit: 1
@@ -82,7 +83,7 @@ status:
           timestamp: "1688663455"
           type: "int"
         value: "250"
-    - propertyName: temperature-enable
+    - propertyName: status
       reported:
         metadata:
           timestamp: "1688663400"

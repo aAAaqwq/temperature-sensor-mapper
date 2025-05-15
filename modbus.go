@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/binary"
+	"fmt"
+	"reflect"
 
 	"github.com/kubeedge/mappers-go/pkg/driver/modbus"
 	"k8s.io/klog/v2"
@@ -22,13 +24,15 @@ func main() {
 		klog.Errorf("Failed to connect to Modbus TCP device: %v", err)
 	}
 	// 读取保持寄存器
-	data, err := client.Get("HoldingRegister", 0, 1)
+	data, err := client.Get("HoldingRegister", 0, 10)
 	if err!= nil {
 		klog.Errorf("Failed to read holding registers: %v", err)
 	}
-	value:=make([]uint16,2)
-	for i:=0;i<2;i++{
-		value[i]=binary.BigEndian.Uint16(data[i*2:i*2+2])
+	n:=len(data)/2
+	value := make([]uint16, n)
+	fmt.Println(n,value)
+	for i:=0;i<n;i+=2{
+		value[i]=binary.BigEndian.Uint16(data[i:i+2])
 	}
 	klog.Infof("Read holding registers: origin:%v convert:%d", data,value)
 	// 读取线圈寄存器
@@ -50,4 +54,11 @@ func main() {
 		klog.Errorf("Failed to write coil registers: %v", err)
 	}
 	klog.Infof("Write coil registers: %v", data)
+	var cfg interface{}
+	cfg=modbus.ModbusTCP{
+		SlaveID: 1,
+	}
+	klog.Infoln(reflect.TypeOf(cfg),reflect.ValueOf(cfg))
+
+
 }
