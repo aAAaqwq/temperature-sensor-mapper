@@ -28,7 +28,7 @@ type ProtocolConfig struct {
 type ConfigData struct {
 	// TODO: add your protocol config data
 	SlaveID int `json:"slaveID,omitempty"` // 从站ID
-	Mode string `json:"mode"`   // 通信模式:enum:TCP/RTU
+	Mode string `json:"mode,omitempty"`   // 通信模式:enum:TCP/RTU
 	// TCP mode
 	IP string `json:"ip,omitempty"`
 	Port string `json:"port,omitempty"`
