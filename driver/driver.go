@@ -26,29 +26,28 @@ func (c *CustomizedClient) InitDevice() error {
 	// you can use c.ProtocolConfig
 	//初始化modbus客户端
 	var config interface{}
-	switch c.ProtocolConfig.Mode {
+	switch c.ProtocolConfig.ConfigData.Mode {
 	case "TCP":
-		config=modbus.ModbusTCP{
+		config = modbus.ModbusTCP{
 			SlaveID:  byte(c.ConfigData.SlaveID),
 			DeviceIP: c.ConfigData.IP,
 			TCPPort:  c.ConfigData.Port,
 		}
 	case "RTU":
-		config=modbus.ModbusRTU{
-			SlaveID:  byte(c.ConfigData.SlaveID),
-			SerialName: c.ConfigData.SerialName,
-			BaudRate:  c.ConfigData.BaudRate,
-			DataBits:  c.ConfigData.DataBits,
-			StopBits:  c.ConfigData.StopBits,
-			Parity:    c.ConfigData.Parity,
+		config = modbus.ModbusRTU{
+			SlaveID:      byte(c.ConfigData.SlaveID),
+			SerialName:   c.ConfigData.SerialName,
+			BaudRate:     c.ConfigData.BaudRate,
+			DataBits:     c.ConfigData.DataBits,
+			StopBits:     c.ConfigData.StopBits,
+			Parity:       c.ConfigData.Parity,
 			RS485Enabled: c.ConfigData.RS485Enabled,
 		}
 	default:
-		klog.Errorf("Invalid protocol mode: %s", c.ProtocolConfig.Mode)
-		return fmt.Errorf("invalid protocol mode: %s", c.ProtocolConfig.Mode)
+		klog.Errorf("Invalid CommunicateMode: %s", c.ProtocolConfig.ConfigData.Mode)
 	}
-	klog.Infoln("Start InitDevice with config:",config)
-	klog.Infoln("ConfigType:",fmt.Sprintf("%T",config))
+	klog.Infoln("Start InitDevice with config:", config)
+	klog.Infoln("ConfigType:", fmt.Sprintf("%T", config))
 	modbusClient, err := modbus.NewClient(config)
 	if err != nil {
 		klog.Errorf("Failed to create Modbus client: %v", err)
@@ -76,28 +75,22 @@ func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, e
 		klog.Errorf("从设备读取数据失败: %v", err)
 		return nil, err
 	}
-	// 根据每2个字节1个uint16数据,依次转换
-	n:=len(data)/2
-	value := make([]uint16, n)
-	for i:=0;i<n;i+=2 {
-		value[i] = binary.BigEndian.Uint16(data[i:i+2])
-	}
-	
+	// 根据每2个字节1个uint16数据,依次转换为uint16
+	value := binary.BigEndian.Uint16(data)
+
 	// 根据数据类型进行转换
 	switch visitor.DataType {
-	case "uint8","uint16","uint32","uint64","uint","int8","int","int16","int32","int64":
-		return cast.ToIntSlice(value),nil
+	case "uint8", "uint16", "uint32", "uint64", "uint", "int8", "int", "int16", "int32", "int64":
+		return cast.ToInt(value), nil
 	case "string":
-		return cast.ToStringSlice(value),nil
-	case "float32","float64":
-		v:=cast.ToFloat64Slice(value)
+		return cast.ToString(value), nil
+	case "float32", "float64":
+		v := cast.ToFloat64(value)
 		// 缩放
 		if visitor.Scale != 0 {
-			for i:=0;i<len(v);i++ {
-				v[i] = v[i] * visitor.Scale
-			}
+			v = v * visitor.Scale
 		}
-		return v,nil
+		return v, nil
 	default:
 		if len(data) > 0 {
 			klog.Infof("成功从设备读取数据: %v", value)
@@ -106,7 +99,6 @@ func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, e
 	}
 	return nil, fmt.Errorf("无效的数据或数据类型: %v", visitor.DataType)
 }
-
 
 // DeviceDataWrite 外部调用DeviceMethod写入数据到设备，DeviceTwins管理层
 func (c *CustomizedClient) DeviceDataWrite(visitor *VisitorConfig, deviceMethodName string, propertyName string, data interface{}) error {
@@ -122,9 +114,9 @@ func (c *CustomizedClient) DeviceDataWrite(visitor *VisitorConfig, deviceMethodN
 func (c *CustomizedClient) SetDeviceData(data interface{}, visitor *VisitorConfig) error {
 	// TODO: set device's data
 	// you can use c.ProtocolConfig and visitor
-	klog.Infof("开始写入数据到设备，数据: %v,类型:%s 寄存器: %s", data, visitor.DataType,visitor.Register)
+	klog.Infof("开始写入数据到设备，数据: %v,类型:%s 寄存器: %s", data, visitor.DataType, visitor.Register)
 	//数据类型转换
-	value:=cast.ToUint16(data)
+	value := cast.ToUint16(data)
 	// 写入到设备的寄存器
 	res, err := c.ModbusClient.Set(visitor.Register, visitor.Offset, value)
 	if err != nil {
