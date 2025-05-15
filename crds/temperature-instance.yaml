@@ -9,19 +9,21 @@ metadata:
 spec:
   deviceModelRef:
     name: temperature-model
+  # 协议
   protocol:
     protocolName: modbus
     configData:
-      slaveID: 1
-      ip: "192.168.25.239" # replace the ip with your imitation device ip
       port: "502"
+      slaveID: 1
+      ip: "192.168.25.239"   # replace the ip with your imitation device ip
   nodeName: "kind-worker" # replace the nodeName with your edge node name
+  #属性
   properties:
     - name: temperature
       visitors:
         protocolName: modbus
         configData:
-          dataType: "int"
+          # dataType: "uint16"
           register: "HoldingRegister"
           offset: 0
           limit: 1
@@ -37,19 +39,36 @@ spec:
           qos: 0
           address: "tcp://127.0.0.1:1883"  # replace the address with your mqtt broker address
           retained: false
-    - name: temperature-enable
+    - name: status
       desired:
         value: "1"
       visitors:
         protocolName: modbus
         configData:
-          dataType: "int"
+          # dataType: "uint16"
           register: "CoilRegister"
           offset: 0
           limit: 1
           scale: 1
           isSwap: false
           isRegisterSwap: false
+  #方法
+  methods:
+    - name: UpdateStatus
+      description: update the status of the device
+      propertyNames:
+        - status
+    - name: GetStatus
+      description: get the status of the device
+      propertyNames:
+        - status
+    - name: GetTemperature
+      description: get the temperature of the device
+      propertyNames:
+        - temperature
+
+
+
 status:
   twins:
     - propertyName: temperature

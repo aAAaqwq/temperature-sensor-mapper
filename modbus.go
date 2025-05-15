@@ -22,7 +22,7 @@ func main() {
 		klog.Errorf("Failed to connect to Modbus TCP device: %v", err)
 	}
 	// 读取保持寄存器
-	data, err := client.Get("HoldingRegister", 0, 2)
+	data, err := client.Get("HoldingRegister", 0, 1)
 	if err!= nil {
 		klog.Errorf("Failed to read holding registers: %v", err)
 	}
@@ -37,4 +37,17 @@ func main() {
 		klog.Errorf("Failed to read coil registers: %v", err)
 	}
 	klog.Infof("Read coil registers: %v", data)
+
+	// 写入保持寄存器
+	data,err = client.Set("HoldingRegister", 0, 500)
+	if err!= nil {
+		klog.Errorf("Failed to write holding registers: %v", err)
+	}
+	klog.Infof("Write holding registers: %v", binary.BigEndian.Uint16(data))
+	// 写入线圈寄存器
+	data,err = client.Set("CoilRegister", 0, 0)	
+	if err!= nil {
+		klog.Errorf("Failed to write coil registers: %v", err)
+	}
+	klog.Infof("Write coil registers: %v", data)
 }

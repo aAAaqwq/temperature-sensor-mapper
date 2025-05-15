@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"sync"
-
+	"github.com/spf13/cast"
 	"github.com/kubeedge/mapper-framework/pkg/common"
 	"github.com/kubeedge/mappers-go/pkg/driver/modbus"
 	"k8s.io/klog/v2"
@@ -28,8 +28,6 @@ func (c *CustomizedClient) InitDevice() error {
 		SlaveID:  byte(c.ConfigData.SlaveID),
 		DeviceIP: c.ConfigData.IP,
 		TCPPort:  c.ConfigData.Port,
-		// DeviceIP: "192.168.25.239",
-		// TCPPort:  "502",
 	}
 	klog.Infoln("Start InitDevice with config:",config)
 	klog.Infoln("ConfigType:",fmt.Sprintf("%T",config))
@@ -60,7 +58,7 @@ func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, e
 		klog.Errorf("从设备读取数据失败: %v", err)
 		return nil, err
 	}
-
+	
 	// 根据数据类型进行转换
 	switch visitor.DataType {
 	case "int":
@@ -83,59 +81,35 @@ func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, e
 	return nil, fmt.Errorf("无效的数据或数据类型: %v", visitor.DataType)
 }
 
+
+// DeviceDataWrite 外部调用DeviceMethod写入数据到设备，DeviceTwins管理层
 func (c *CustomizedClient) DeviceDataWrite(visitor *VisitorConfig, deviceMethodName string, propertyName string, data interface{}) error {
 	c.deviceMutex.Lock()
 	defer c.deviceMutex.Unlock()
 
 	klog.Infof("开始写入数据到设备，方法名: %s, 属性名: %s, 数据: %v, 寄存器: %s", deviceMethodName, propertyName, data, visitor.Register)
 
-	// 根据数据类型进行转换
-	var value uint16
-	switch v := data.(type) {
-	case int:
-		if visitor.Scale != 0 {
-			value = uint16(float64(v) / visitor.Scale)
-		} else {
-			value = uint16(v)
-		}
-	case float64:
-		if visitor.Scale != 0 {
-			value = uint16(v / visitor.Scale)
-		} else {
-			value = uint16(v)
-		}
-	case string:
-		// 尝试将字符串转换为整数
-		var intValue int
-		_, err := fmt.Sscanf(v, "%d", &intValue)
-		if err != nil {
-			klog.Errorf("字符串转换为整数失败: %v", err)
-			return err
-		}
-		value = uint16(intValue)
-	default:
-		klog.Errorf("不支持的数据类型: %T", data)
-		return fmt.Errorf("不支持的数据类型: %T", data)
-	}
+	return c.SetDeviceData(data, visitor)
+}
 
-	klog.Infof("准备写入数据到寄存器，值: %d", value)
+// SetDeviceData 内部写入数据到设备,Device协议层
+func (c *CustomizedClient) SetDeviceData(data interface{}, visitor *VisitorConfig) error {
+	// TODO: set device's data
+	// you can use c.ProtocolConfig and visitor
+	klog.Infof("开始写入数据到设备，数据: %v,类型:%s 寄存器: %s", data, visitor.DataType,visitor.Register)
+	//数据类型转换
+	value:=cast.ToUint16(data)
 	// 写入到设备的寄存器
-	res, err := c.ModbusClient.Set(visitor.Register, uint16(visitor.Offset), value)
+	res, err := c.ModbusClient.Set(visitor.Register, visitor.Offset, value)
 	if err != nil {
 		klog.Errorf("写入数据到设备失败: %v", err)
 		return err
 	}
-	klog.Infof("成功写入数据到设备: %v", res)
-
+	klog.Infof("成功写入数据到设备: %v", binary.BigEndian.Uint16((res)))
 	return nil
 }
 
-func (c *CustomizedClient) SetDeviceData(data interface{}, visitor *VisitorConfig) error {
-	// TODO: set device's data
-	// you can use c.ProtocolConfig and visitor
-	return c.DeviceDataWrite(visitor, "", "", data)
-}
-
+// StopDevice 停止设备连接
 func (c *CustomizedClient) StopDevice() error {
 	// TODO: stop device
 	// you can use c.ProtocolConfig
@@ -144,10 +118,10 @@ func (c *CustomizedClient) StopDevice() error {
 		klog.Errorf("Failed to close Modbus client: %v", err)
 		return err
 	}
-
 	return nil
 }
 
+// GetDeviceStates 获取设备状态
 func (c *CustomizedClient) GetDeviceStates() (string, error) {
 	// TODO: GetDeviceStates
 	klog.Infoln("开始检查设备状态")

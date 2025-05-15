@@ -13,7 +13,7 @@ spec:
       minimum: "0"  # actual 0.0 degree
       maximum: "1000"  # actual 100.0 degree
       unit: "Celsius" 
-    - name: temperature-enable
-      description: enable data collection of temperature
+    - name: status
+      description: "device status 0:exception,1:normal"
       type: INT  #ENUM: INT,FLOAT,DOUBLE,STRING,BOOLEAN,BYTES
       accessMode: ReadWrite

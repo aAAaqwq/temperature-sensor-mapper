@@ -22,7 +22,7 @@ type CustomizedClient struct {
 
 type ProtocolConfig struct {
 	ProtocolName string `json:"protocolName"`
-	ConfigData   `json:"configData"`
+	ConfigData  `json:"configData"`
 }
 
 type ConfigData struct {
@@ -35,6 +35,7 @@ type CommunicationMode struct{
 	Mode string `json:"mode"`
 	IP string `json:"ip,omitempty"`
 	Port string `json:"port,omitempty"`
+	Timeout int `json:"timeout,omitempty"`
 	// Todo：add RTU mode
 }
 
