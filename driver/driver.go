@@ -11,6 +11,13 @@ import (
 	"k8s.io/klog/v2"
 )
 
+const (
+	CoilRegister          = "CoilRegister"
+	InputRegister         = "InputRegister"
+	HoldingRegister       = "HoldingRegister"
+	DiscreteInputRegister = "DiscreteInputRegister"
+)
+
 func NewClient(protocol ProtocolConfig) (*CustomizedClient, error) {
 	client := &CustomizedClient{
 		ProtocolConfig: protocol,
@@ -72,28 +79,31 @@ func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, e
 
 	klog.Infof("开始从设备读取数据,Register: %s, Offset: %d, Limit: %d", visitor.Register, visitor.Offset, visitor.Limit)
 	data, err := c.ModbusClient.Get(visitor.Register, visitor.Offset, visitor.Limit)
-	//返回的data是实际寄存器数据，每个寄存器占用2个字节
 	if err != nil {
 		klog.Errorf("从设备读取数据失败: %v", err)
 		return nil, err
 	}
-	// 根据每2个字节1个uint16数据,依次转换为uint16
-	value := binary.BigEndian.Uint16(data)
-
-	//警告处理
-	if (visitor.Min!=nil && value < *visitor.Min) {
-		klog.Warning(fmt.Sprintf("当前温度小于最小值: %d < %d", value, *visitor.Min))
-		// 	VisitorConfigData: VisitorConfigData{
-		// 		DataType: "uint16",
-		// 		Register: "CoilRegister",
-		// 		Offset:   0,
-		// 	},
-		// },"SetStatus","status",0)
-	}else if visitor.Max!=nil && value > *visitor.Max {
-		klog.Warning(fmt.Sprintf("当前温度超过最大值: %d > %d", value, *visitor.Max))
+	var value uint16
+	switch visitor.Register {
+	case CoilRegister, InputRegister, DiscreteInputRegister:
+		//返回的Coil寄存器数据占用1个字节
+		value = uint16(data[0])
+		// 工作状态警告处理
+		if value == 0 {
+			klog.Warning("温度传感器已停止工作")
+		}
+	case HoldingRegister:
+		//返回的Holding寄存器数据占用2个字节
+		value = binary.BigEndian.Uint16(data)
+		//温度警告处理
+		if visitor.Min != nil && value < *visitor.Min {
+			klog.Warning(fmt.Sprintf("当前温度小于最小值: %d < %d", value, *visitor.Min))
+		} else if visitor.Max != nil && value > *visitor.Max {
+			klog.Warning(fmt.Sprintf("当前温度超过最大值: %d > %d", value, *visitor.Max))
+		}
 	}
 
-	// 根据数据类型进行转换
+	// 根据数据类型进行转换输出
 	switch visitor.DataType {
 	case "uint8", "uint16", "uint32", "uint64", "uint", "int8", "int", "int16", "int32", "int64":
 		return cast.ToInt(value), nil
