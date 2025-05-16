@@ -7,7 +7,7 @@ ENV GO111MODULE=on \
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o main cmd/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build  -ldflags="-s -w" -o main ./cmd/main.go
 
 
 FROM ubuntu:18.04

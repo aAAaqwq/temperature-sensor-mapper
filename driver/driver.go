@@ -26,7 +26,8 @@ func (c *CustomizedClient) InitDevice() error {
 	// you can use c.ProtocolConfig
 	//初始化modbus客户端
 	var config interface{}
-	switch c.ProtocolConfig.ConfigData.Mode {
+	klog.Infoln("Modbus CommunicateMode:", c.ProtocolConfig)
+	switch c.ProtocolConfig.ConfigData.CommunicateMode {
 	case "TCP":
 		config = modbus.ModbusTCP{
 			SlaveID:  byte(c.ConfigData.SlaveID),
@@ -44,7 +45,7 @@ func (c *CustomizedClient) InitDevice() error {
 			RS485Enabled: c.ConfigData.RS485Enabled,
 		}
 	default:
-		klog.Errorf("Invalid CommunicateMode: %s", c.ProtocolConfig.ConfigData.Mode)
+		klog.Errorf("Invalid CommunicateMode: %s", c.ConfigData.CommunicateMode)
 	}
 	klog.Infoln("Start InitDevice with config:", config)
 	klog.Infoln("ConfigType:", fmt.Sprintf("%T", config))
@@ -59,6 +60,7 @@ func (c *CustomizedClient) InitDevice() error {
 		c.StopDevice() // 关闭客户端释放资源
 		return err
 	}
+	c.ModbusClient = modbusClient
 	klog.Infoln("InitDevice success")
 	return nil
 }
@@ -68,7 +70,7 @@ func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, e
 	c.deviceMutex.Lock()
 	defer c.deviceMutex.Unlock()
 
-	klog.Infof("开始从设备读取数据，Register: %s, Offset: %d, Limit: %d", visitor.Register, visitor.Offset, visitor.Limit)
+	klog.Infof("开始从设备读取数据,Register: %s, Offset: %d, Limit: %d", visitor.Register, visitor.Offset, visitor.Limit)
 	data, err := c.ModbusClient.Get(visitor.Register, visitor.Offset, visitor.Limit)
 	//返回的data是实际寄存器数据，每个寄存器占用2个字节
 	if err != nil {
@@ -77,6 +79,19 @@ func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, e
 	}
 	// 根据每2个字节1个uint16数据,依次转换为uint16
 	value := binary.BigEndian.Uint16(data)
+
+	//警告处理
+	if (visitor.Min!=nil && value < *visitor.Min) {
+		klog.Warning(fmt.Sprintf("当前温度小于最小值: %d < %d", value, *visitor.Min))
+		// 	VisitorConfigData: VisitorConfigData{
+		// 		DataType: "uint16",
+		// 		Register: "CoilRegister",
+		// 		Offset:   0,
+		// 	},
+		// },"SetStatus","status",0)
+	}else if visitor.Max!=nil && value > *visitor.Max {
+		klog.Warning(fmt.Sprintf("当前温度超过最大值: %d > %d", value, *visitor.Max))
+	}
 
 	// 根据数据类型进行转换
 	switch visitor.DataType {
@@ -114,7 +129,7 @@ func (c *CustomizedClient) DeviceDataWrite(visitor *VisitorConfig, deviceMethodN
 func (c *CustomizedClient) SetDeviceData(data interface{}, visitor *VisitorConfig) error {
 	// TODO: set device's data
 	// you can use c.ProtocolConfig and visitor
-	klog.Infof("开始写入数据到设备，数据: %v,类型:%s 寄存器: %s", data, visitor.DataType, visitor.Register)
+	klog.Infof("开始写入数据到设备，数据: %v,Visitor: %v", data, visitor)
 	//数据类型转换
 	value := cast.ToUint16(data)
 	// 写入到设备的寄存器

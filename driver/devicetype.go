@@ -28,7 +28,7 @@ type ProtocolConfig struct {
 type ConfigData struct {
 	// TODO: add your protocol config data
 	SlaveID int `json:"slaveID,omitempty"` // 从站ID
-	Mode string `json:"mode"`   // 通信模式:enum:TCP/RTU
+	CommunicateMode string `json:"communicateMode"`   // 通信模式:enum:TCP/RTU
 	// TCP mode
 	IP string `json:"ip,omitempty"`
 	Port string `json:"port,omitempty"`
@@ -53,7 +53,9 @@ type VisitorConfigData struct {
 	Register string `json:"register"` // 寄存器类型:enum:CoilRegister/HoldingRegister
 	Offset uint16 `json:"offset"`        // 寄存器偏移量
 	Scale float64 `json:"scale"`      // 数据缩放比例
-	IsSwap bool `json:"isSwap"`       // 是否交换字节
+	IsSwap bool `json:"isSwap,omitempty"`       // 是否交换字节
 	Limit uint16 `json:"limit"`          // 读取数量
-	IsRegisterSwap bool `json:"isRegisterSwap"` // 是否交换寄存器
+	IsRegisterSwap bool `json:"isRegisterSwap,omitempty"` // 是否交换寄存器
+	Max *uint16 `json:"max,omitempty"`            // 最大值
+	Min *uint16 `json:"min,omitempty"`            // 最小值
 }
