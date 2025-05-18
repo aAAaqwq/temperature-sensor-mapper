@@ -6,6 +6,19 @@ import (
 	"github.com/kubeedge/mapper-framework/pkg/common"
 	"github.com/kubeedge/mappers-go/pkg/driver/modbus"
 )
+const (
+	CoilRegister          = "CoilRegister"
+	InputRegister         = "InputRegister"
+	HoldingRegister       = "HoldingRegister"
+	DiscreteInputRegister = "DiscreteInputRegister"
+	INT                   = "INT"
+	FLOAT                 = "FLOAT"
+	DOUBLE                = "DOUBLE"
+	STRING                = "STRING"
+	BOOLEN                = "BOOLEN"
+	BYTES                 = "BYTES"
+
+)
 
 // CustomizedDev is the customized device configuration and client information.
 type CustomizedDev struct {
@@ -56,6 +69,6 @@ type VisitorConfigData struct {
 	IsSwap bool `json:"isSwap,omitempty"`       // 是否交换字节
 	Limit uint16 `json:"limit"`          // 读取数量
 	IsRegisterSwap bool `json:"isRegisterSwap,omitempty"` // 是否交换寄存器
-	Max *uint16 `json:"max,omitempty"`            // 最大值
-	Min *uint16 `json:"min,omitempty"`            // 最小值
+	Max *float64 `json:"max,omitempty"`            // 最大值
+	Min *float64 `json:"min,omitempty"`            // 最小值
 }

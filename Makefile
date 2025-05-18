@@ -33,21 +33,31 @@ $(make_rules):
 .DEFAULT_GOAL := help
 .PHONY: $(make_rules) build test package
 
-build-git:
+
+DOCKER_REGISTRY ?= ""
+
+deploy: deploy-crds deploy-resource
+
+clean:  undeploy-crds undeploy-resource
+build-app:
 	CGO_ENABLED=0 GOOS=linux go build  -ldflags="-s -w" -o main ./cmd/main.go
-build-push:
-	docker buildx build -f ./Dockerfile_nostream -t aaqwqaa/temperature-mapper:v1.0 .
-	docker push aaqwqaa/temperature-mapper:v1.0
+docker-build-push:
+ifeq ($(DOCKER_REGISTRY), "")
+	$(error DOCKER_REGISTRY is not set, please set it use "export DOCKER_REGISTRY=<your-registry> " first)
+endif
+	docker buildx build -f ./Dockerfile_nostream -t ${DOCKER_REGISTRY}/temperature-mapper:v1.0 .
+	docker push ${DOCKER_REGISTRY}/temperature-mapper:v1.0
+undeploy-crds:
+	kubectl delete -f./crds/temperature-instance.yaml
+	kubectl delete -f./crds/temperature-model.yaml
+undeploy-resource:
+	kubectl delete -f./resource/deployment.yaml
+	kubectl delete -f./resource/configmap.yaml
+
 deploy-resource:
 	kubectl apply -f ./resource/configmap.yaml
 	kubectl apply -f./resource/deployment.yaml
 deploy-crds:
-	kubectl apply -f ./crds/temperature-model.yaml
-	kubectl apply -f ./crds/temperature-instance.yaml
-undeploy-crds:
-	kubectl delete -f./crds/temperature-model.yaml
-	kubectl delete -f./crds/temperature-instance.yaml
-undeploy-resource:
-	kubectl delete -f./resource/configmap.yaml
-	kubectl delete -f./resource/deployment.yaml
+	kubectl apply -f./crds/temperature-model.yaml
+	kubectl apply -f./crds/temperature-instance.yaml
 

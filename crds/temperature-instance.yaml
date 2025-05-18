@@ -13,24 +13,22 @@ spec:
       communicateMode: "TCP"   #TCP/RTU
       port: "502"
       slaveID: 1
-      ip: "192.168.25.239"   # replace the ip with your imitation device ip
-  nodeName: "kind-worker" # replace the nodeName with your edge node name
+      ip: "192.168.25.239"   # 1.replace the ip with your imitation device ip
+  nodeName: "kind-worker" # 2.replace the nodeName with your edge node name
   #属性
   properties:
     - name: temperature
-      desired:
-        value: "250"
       visitors:
         protocolName: modbus
         configData:
-          dataType: "uint16"
+          dataType: "FLOAT"  #the same as the type in the device model
           register: "HoldingRegister"
-          offset: 0
-          limit: 1
-          scale: 1.0 # 温度值的缩放因子
+          offset: 0  # 寄存器的偏移量
+          limit: 1   # 读取寄存器的数量
+          scale: 0.1 # 温度值的缩放因子
           isSwap: false  # 不交换字节
           isRegisterSwap: false # 不交换寄存器
-          Max: 1000
+          Max: 100.0
           Min: 0
       collectCycle: 10000
       reportCycle: 10000
@@ -51,7 +49,7 @@ spec:
       visitors:
         protocolName: modbus
         configData:
-          dataType: "uint16"
+          dataType: "INT"
           register: "CoilRegister"
           offset: 0
           limit: 1
@@ -64,29 +62,22 @@ spec:
       description: update the status of the device
       propertyNames:
         - status
-    - name: GetStatus
-      description: get the status of the device
-      propertyNames:
-        - status
-    - name: GetTemperature
-      description: get the temperature of the device
+    - name: UpdateTemperature
+      description: update the temperature of the device
       propertyNames:
         - temperature
-
-
-
 status:
   twins:
     - propertyName: temperature
       reported:
         metadata:
           timestamp: "1688663455"
-          type: "int"
+          type: "float"
         value: "250"
       observedDesired:
         metadata:
           timestamp: "1688663455"
-          type: "int"
+          type: "float"
         value: "250"
     - propertyName: status
       reported:

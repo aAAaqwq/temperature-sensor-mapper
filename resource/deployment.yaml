@@ -13,7 +13,7 @@ spec:
       labels:
         app: demo
     spec:
-      nodeName: kind-worker # replace with your edge node name
+      nodeName: kind-worker # 1.replace with your edge node name
       containers:
         - name: demo
           volumeMounts: # Required, mapper need to communicate with grpcclient and get the config
@@ -27,7 +27,7 @@ spec:
           #       secretKeyRef:
           #         name: mysecret
           #         key: token
-          image: aaqwqaa/temperature-mapper:v1.0 # Replace with your mapper image name
+          image: aaqwqaa/temperature-mapper:v1.0 # 2.Replace with your mapper image name
           imagePullPolicy: IfNotPresent
           resources:
             limits:
@@ -36,10 +36,8 @@ spec:
             requests:
               cpu: 100m
               memory: 100Mi
-          command: [ "/bin/sh","-c" ]
+          command: [ "bash","-c" ]
           args: [ "/kubeedge/main --config-file /tmp/config.yaml --v 5" ] 
-          containerPort: 7777 # mapper REST API port
-          containerPort: 1883 # MQTT port
       volumes:
         - name: test-volume
           hostPath:
@@ -72,5 +70,6 @@ spec:
       nodePort: 30077    # 节点暴露的端口（可选范围 30000-32767）
     - name: mqtt
       protocol: TCP
-      port: 1883           # Service 的虚拟端口
-      targetPort: 1883   # 容器端口
+      port: 1883           
+      targetPort: 1883   
+      nodePort: 31883   

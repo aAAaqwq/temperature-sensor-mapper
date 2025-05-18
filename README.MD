@@ -41,37 +41,56 @@
 
 ### 1. 克隆仓库到本地
 ```
-git clone 
+git clone https://github.com/aAAaqwq/temperature-sensor-mapper
 ```
 
 ### 2.配置Modbus模拟软件(如果条件允许可以使用物理设备)
 ```
  安装modbus Slave(推荐)
-    - 创建TCP/RTU设备连接
+    - 创建TCP/RTU设备连接,mapper默认使用TCP协议。
     - 配置Modbus寄存器：
         - 温度寄存器：保持寄存器，地址4000，数据类型：uint16
         - 工作状态寄存器：线圈寄存器，地址1001，数据类型：uint16
-    - 设置寄存器
 ```
 
 ### 3. 配置mapper插件
-```
- 配置/crds/temperature-instance.yaml
- 配置/resource/deployment.yaml 
-```
+ - 配置/crds/temperature-instance.yaml
+ ```
+
+ ```
+ - 配置/resource/deployment.yaml
+ ```
+ ``` 
 ### 4. 编译和构建mapper插件镜像
 ```
-docker build -f ./Dockerfile_nostream -t your-registry/temperature-mapper:v1.0 .
-docker push your-registry/temperature-mapper:v1.0
+export DOCKER_REGISTRY=<your_docker_registry>
+make docker-build-push
 ```
 
-### 5. 部署到kubeedge
+### 5. 部署mapper和crds
 ```
-make deploy-resource
-make deploy-crds
+make deploy
 ```
 ### 6. 验证插件功能
-#### 6.1 查看twins字段中的reported字段是否变化:kubectl get device -o yaml
-#### 6.2 在edgecore节点上:curl http://127.0.0.1:7777/api/v1/ping
+#### 6.1 查看twins字段中的reported字段同步:
+```
+kubectl get device -o yaml 
+```
+#### 6.2 在edgecore节点上访问mapper插件的REST API
+- 健康检查
+```
+curl 127.0.0.1:7777/api/v1/ping 
+```
+- 获取设备状态
+```
+curl <your_edge_ip>:30077/api/v1/device/<namespace>/<device_name>/<property_name>
+```
+<img src="./img/getTemp.png">
+
 #### 6.3 查看mapper日志
+
+### 7. 卸载插件
+```
+make clean
+```
 
