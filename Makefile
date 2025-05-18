@@ -34,6 +34,8 @@ $(make_rules):
 .PHONY: $(make_rules) build test package
 
 
+.PHONY: clean deploy docker-build-push
+
 DOCKER_REGISTRY ?= ""
 
 deploy: deploy-crds deploy-resource
@@ -45,7 +47,7 @@ docker-build-push:
 ifeq ($(DOCKER_REGISTRY), "")
 	$(error DOCKER_REGISTRY is not set, please set it use "export DOCKER_REGISTRY=<your-registry> " first)
 endif
-	docker buildx build -f ./Dockerfile_nostream -t ${DOCKER_REGISTRY}/temperature-mapper:v1.0 .
+	docker build -f ./Dockerfile_nostream -t ${DOCKER_REGISTRY}/temperature-mapper:v1.0 .
 	docker push ${DOCKER_REGISTRY}/temperature-mapper:v1.0
 undeploy-crds:
 	kubectl delete -f./crds/temperature-instance.yaml

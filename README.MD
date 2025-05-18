@@ -35,7 +35,7 @@
 
 - KubeEdge环境（v1.12.0或更高版本）
 - Go 1.22.0或更高版本
-- Modbus模拟软件（用于测试，如ModbusPal、Modbus Slave等）
+- Modbus Simulator
 
 ## 快速开始
 

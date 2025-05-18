@@ -11,10 +11,10 @@ spec:
     protocolName: modbus
     configData:
       communicateMode: "TCP"   #TCP/RTU
-      port: "502"
+      port: "30502"             # replace the port with your modbus device port
       slaveID: 1
-      ip: "192.168.25.239"   # 1.replace the ip with your imitation device ip
-  nodeName: "kind-worker" # 2.replace the nodeName with your edge node name
+      ip: "172.18.0.2"   # replace the ip with your modbus device ip
+  nodeName: "kind-worker" # 1.replace the nodeName with your edge node name
   #属性
   properties:
     - name: temperature
