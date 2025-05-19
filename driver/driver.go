@@ -4,9 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"sync"
-	
-
-	
 
 	"github.com/kubeedge/mapper-framework/pkg/common"
 	"github.com/kubeedge/mappers-go/pkg/driver/modbus"
@@ -14,13 +11,11 @@ import (
 	"k8s.io/klog/v2"
 )
 
-
-
 func NewClient(protocol ProtocolConfig) (*CustomizedClient, error) {
 	client := &CustomizedClient{
 		ProtocolConfig: protocol,
 		deviceMutex:    sync.Mutex{},
-		ModbusClient: nil,
+		ModbusClient:   nil,
 	}
 	return client, nil
 }
@@ -70,7 +65,6 @@ func (c *CustomizedClient) InitDevice() error {
 	return nil
 }
 
-
 // GetDeviceData 获取设备数据并转换类型输出
 func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, error) {
 	c.deviceMutex.Lock()
@@ -90,40 +84,38 @@ func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, e
 		value = uint16(data[0])
 		// 工作状态警告处理
 		if value == 0 {
-			warn="温度传感器已停止工作"
+			warn = "温度传感器已停止工作"
 		}
 	case HoldingRegister:
 		//返回的Holding寄存器数据占用2个字节
 		value = binary.BigEndian.Uint16(data)
-		t:=ZoomIn(value, visitor.Scale)
-		klog.Infoln(t,*visitor.Max,*visitor.Min)
+		t := ZoomIn(value, visitor.Scale)
 		//温度警告处理
-		if visitor.Min != nil {
-			if t < *visitor.Min  {
-				warn=fmt.Sprintf("当前温度小于最小值: %.1f < %.1f", t,*visitor.Min)
-			}
-		} else if visitor.Max != nil{
-			if t > *visitor.Max {
-				warn=fmt.Sprintf("当前温度超过最大值: %.1f > %.1f", t, *visitor.Max)
-			}
+		if visitor.Min != nil && t < *visitor.Min {
+			warn = fmt.Sprintf("当前温度小于最小值: %.1f < %.1f", t, *visitor.Min)
+		}
+		if visitor.Max != nil && t > *visitor.Max {
+			warn = fmt.Sprintf("当前温度超过最大值: %.1f > %.1f", t, *visitor.Max)
 		}
 	}
 	// 根据数据类型进行转换输出
-	v,err := DataNormalize(value, visitor)
+	v, err := DataNormalize(value, visitor)
 	var out string
-	if warn== "" {
-		out=fmt.Sprintf("从设备读取到数据,Type:%T Value:%v", v,v)
-	}else{
-		out=fmt.Sprintf("从设备读取到数据,Type:%T Value:%v,Warning:%s", v,v,warn)
+	if warn == "" {
+		out = fmt.Sprintf("从设备读取到数据,Type:%T Value:%v", v, v)
+	} else {
+		out = fmt.Sprintf("从设备读取到数据,Type:%T Value:%v,Warning:%s", v, v, warn)
 	}
 	klog.Infof(out)
-	return out,err
+	return out, err
 }
-//根据scale缩小
+
+// 根据scale缩小
 func ZoomIn(data uint16, scale float64) float64 {
-	return cast.ToFloat64(data) * scale	
+	return cast.ToFloat64(data) * scale
 }
-//根据scale放大
+
+// 根据scale放大
 func ZoomOut(data float64, scale float64) uint16 {
 	if scale == 0 {
 		return 0
@@ -133,7 +125,7 @@ func ZoomOut(data float64, scale float64) uint16 {
 
 // DataNormalize 规范化数据类型转换
 func DataNormalize(data interface{}, visitor *VisitorConfig) (interface{}, error) {
-	
+
 	switch visitor.DataType {
 	case INT:
 		return cast.ToInt(data), nil
@@ -149,7 +141,7 @@ func DataNormalize(data interface{}, visitor *VisitorConfig) (interface{}, error
 	case DOUBLE:
 		v := cast.ToFloat64(data)
 		// 缩放
-		if visitor.Scale!= 0 {
+		if visitor.Scale != 0 {
 			v = v * visitor.Scale
 		}
 		return v, nil
@@ -160,8 +152,8 @@ func DataNormalize(data interface{}, visitor *VisitorConfig) (interface{}, error
 	}
 	return nil, fmt.Errorf("无效的数据或数据类型: %v", visitor.DataType)
 
-
 }
+
 // DeviceDataWrite 外部调用DeviceMethod写入数据到设备，DeviceTwins管理层
 func (c *CustomizedClient) DeviceDataWrite(visitor *VisitorConfig, deviceMethodName string, propertyName string, data interface{}) error {
 	c.deviceMutex.Lock()
@@ -177,12 +169,12 @@ func (c *CustomizedClient) SetDeviceData(data interface{}, visitor *VisitorConfi
 	// TODO: set device's data
 	// you can use c.ProtocolConfig and visitor
 	klog.Infof("开始写入数据到设备，数据: %v,Visitor: %v", data, visitor)
-	if data==""||data==nil{
+	if data == "" || data == nil {
 		klog.Infof("数据为空，不写入设备")
 		return nil
 	}
 	//数据类型转换
-	value:=cast.ToUint16(ZoomOut(cast.ToFloat64(data), visitor.Scale))
+	value := cast.ToUint16(ZoomOut(cast.ToFloat64(data), visitor.Scale))
 	// 写入到设备的寄存器
 	res, err := c.ModbusClient.Set(visitor.Register, visitor.Offset, value)
 	if err != nil {
