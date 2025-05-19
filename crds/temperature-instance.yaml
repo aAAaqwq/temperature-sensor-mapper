@@ -13,15 +13,15 @@ spec:
       communicateMode: "TCP"   #TCP/RTU
       port: "30502"             # replace the port with your modbus device port
       slaveID: 1
-      ip: "172.18.0.2"   # replace the ip with your modbus device ip
-  nodeName: "kind-worker" # 1.replace the nodeName with your edge node name
+      ip: "172.18.0.3"   # 1.replace the ip with your modbus device ip
+  nodeName: "kind-worker" # 2.replace the nodeName with your edge node name
   #属性
   properties:
     - name: temperature
       visitors:
         protocolName: modbus
         configData:
-          dataType: "FLOAT"  #the same as the type in the device model
+          dataType: "float"  #Enum::int/float/double/string/boolean/bytes
           register: "HoldingRegister"
           offset: 0  # 寄存器的偏移量
           limit: 1   # 读取寄存器的数量
@@ -33,13 +33,13 @@ spec:
       collectCycle: 10000
       reportCycle: 10000
       reportToCloud: true
-      # 开启推送功能需要部署相关的服务,如broker
-      # pushMethod:
-      #   mqtt:
-      #     topic: "current temperature"
-      #     qos: 0
-      #     address: "tcp://127.0.0.1:1883"  # replace the address with your mqtt broker address
-      #     retained: false
+      # 开启推送功能需要部署相关的服务,如mosquitto broker
+      pushMethod:
+        mqtt:
+          topic: "current temperature"
+          qos: 0
+          address: "tcp://172.18.0.3:31883"  # replace the address with your mqtt broker address
+          retained: false
     - name: status
       collectCycle: 10000
       reportCycle: 10000
@@ -49,7 +49,7 @@ spec:
       visitors:
         protocolName: modbus
         configData:
-          dataType: "INT"
+          dataType: "int"
           register: "CoilRegister"
           offset: 0
           limit: 1
@@ -71,14 +71,14 @@ status:
     - propertyName: temperature
       reported:
         metadata:
-          timestamp: "1688663455"
+          timestamp: "1688663400"
           type: "float"
-        value: "250"
+        value: "25.5"
       observedDesired:
         metadata:
-          timestamp: "1688663455"
+          timestamp: "1688663400"
           type: "float"
-        value: "250"
+        value: "25.5"
     - propertyName: status
       reported:
         metadata:

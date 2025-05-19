@@ -2,7 +2,6 @@ apiVersion: devices.kubeedge.io/v1beta1
 kind: DeviceModel
 metadata:
   name: temperature-model
-  namespace: default
 spec:
   protocol: modbus
   properties:

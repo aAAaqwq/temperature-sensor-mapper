@@ -11,12 +11,12 @@ const (
 	InputRegister         = "InputRegister"
 	HoldingRegister       = "HoldingRegister"
 	DiscreteInputRegister = "DiscreteInputRegister"
-	INT                   = "INT"
-	FLOAT                 = "FLOAT"
-	DOUBLE                = "DOUBLE"
-	STRING                = "STRING"
-	BOOLEN                = "BOOLEN"
-	BYTES                 = "BYTES"
+	INT                   = "int"
+	FLOAT                 = "float"
+	DOUBLE                = "double"
+	STRING                = "string"
+	BOOLEN                = "boolen"
+	BYTES                 = "bytes"
 
 )
 
@@ -35,7 +35,7 @@ type CustomizedClient struct {
 
 type ProtocolConfig struct {
 	ProtocolName string `json:"protocolName"`
-	ConfigData  `json:"configData"`
+	ConfigData      `json:"configData"`
 }
 
 type ConfigData struct {

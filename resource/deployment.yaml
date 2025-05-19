@@ -28,7 +28,7 @@ spec:
           #         name: mysecret
           #         key: token
           image: aaqwqaa/temperature-mapper:v1.0 # 2.Replace with your mapper image name
-          imagePullPolicy: IfNotPresent
+          # imagePullPolicy: Always
           resources:
             limits:
               cpu: 300m
@@ -68,8 +68,4 @@ spec:
       port: 7777           # Service 的虚拟端口
       targetPort: 7777   # 容器端口
       nodePort: 30077    # 节点暴露的端口（可选范围 30000-32767）
-    - name: mqtt
-      protocol: TCP
-      port: 1883           
-      targetPort: 1883   
-      nodePort: 31883   
+ 

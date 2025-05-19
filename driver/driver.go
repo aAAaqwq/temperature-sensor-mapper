@@ -20,12 +20,12 @@ func NewClient(protocol ProtocolConfig) (*CustomizedClient, error) {
 	client := &CustomizedClient{
 		ProtocolConfig: protocol,
 		deviceMutex:    sync.Mutex{},
-		// TODO initialize the variables you added
 		ModbusClient: nil,
 	}
 	return client, nil
 }
 
+// InitDevice 初始化设备
 func (c *CustomizedClient) InitDevice() error {
 	// TODO: add init operation
 	// you can use c.ProtocolConfig
@@ -70,6 +70,7 @@ func (c *CustomizedClient) InitDevice() error {
 	return nil
 }
 
+
 // GetDeviceData 获取设备数据并转换类型输出
 func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, error) {
 	c.deviceMutex.Lock()
@@ -82,35 +83,41 @@ func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, e
 		return nil, err
 	}
 	var value uint16
+	var warn string
 	switch visitor.Register {
 	case CoilRegister, InputRegister, DiscreteInputRegister:
 		//返回的Coil寄存器数据占用1个字节
 		value = uint16(data[0])
 		// 工作状态警告处理
 		if value == 0 {
-			klog.Warning("温度传感器已停止工作")
+			warn="温度传感器已停止工作"
 		}
 	case HoldingRegister:
 		//返回的Holding寄存器数据占用2个字节
 		value = binary.BigEndian.Uint16(data)
+		t:=ZoomIn(value, visitor.Scale)
+		klog.Infoln(t,*visitor.Max,*visitor.Min)
 		//温度警告处理
 		if visitor.Min != nil {
-			MinT:=ZoomOut(*visitor.Max, visitor.Scale)
-			if value < MinT {
-				klog.Warning(fmt.Sprintf("当前温度小于最小值: %d < %d", value, MinT))
+			if t < *visitor.Min  {
+				warn=fmt.Sprintf("当前温度小于最小值: %.1f < %.1f", t,*visitor.Min)
 			}
-		
 		} else if visitor.Max != nil{
-			MaxT:=ZoomOut(*visitor.Max, visitor.Scale)
-			if value > MaxT {
-				klog.Warning(fmt.Sprintf("当前温度超过最大值: %d > %d", value, MaxT))
+			if t > *visitor.Max {
+				warn=fmt.Sprintf("当前温度超过最大值: %.1f > %.1f", t, *visitor.Max)
 			}
 		}
 	}
 	// 根据数据类型进行转换输出
 	v,err := DataNormalize(value, visitor)
-	klog.Infof("成功从设备读取到 %s 数据,Type:%T Value:%v", visitor.DataType,v,v)
-	return v,err
+	var out string
+	if warn== "" {
+		out=fmt.Sprintf("从设备读取到数据,Type:%T Value:%v", v,v)
+	}else{
+		out=fmt.Sprintf("从设备读取到数据,Type:%T Value:%v,Warning:%s", v,v,warn)
+	}
+	klog.Infof(out)
+	return out,err
 }
 //根据scale缩小
 func ZoomIn(data uint16, scale float64) float64 {
@@ -170,6 +177,10 @@ func (c *CustomizedClient) SetDeviceData(data interface{}, visitor *VisitorConfi
 	// TODO: set device's data
 	// you can use c.ProtocolConfig and visitor
 	klog.Infof("开始写入数据到设备，数据: %v,Visitor: %v", data, visitor)
+	if data==""||data==nil{
+		klog.Infof("数据为空，不写入设备")
+		return nil
+	}
 	//数据类型转换
 	value:=cast.ToUint16(ZoomOut(cast.ToFloat64(data), visitor.Scale))
 	// 写入到设备的寄存器
