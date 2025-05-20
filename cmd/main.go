@@ -5,17 +5,19 @@ import (
 
 	"k8s.io/klog/v2"
 
-	"github.com/kubeedge/temperature-sensor-mapper/device"
 	"github.com/kubeedge/mapper-framework/pkg/common"
 	"github.com/kubeedge/mapper-framework/pkg/config"
 	"github.com/kubeedge/mapper-framework/pkg/grpcclient"
 	"github.com/kubeedge/mapper-framework/pkg/grpcserver"
 	"github.com/kubeedge/mapper-framework/pkg/httpserver"
+	"github.com/kubeedge/temperature-sensor-mapper/device"
+	modbus_simulator "github.com/kubeedge/temperature-sensor-mapper/modbus-simulator"
 )
 
 func main() {
 	var err error
 	var c *config.Config
+	go modbus_simulator.InitModbusSimulator(":5502")
 
 	klog.InitFlags(nil)
 	defer klog.Flush()

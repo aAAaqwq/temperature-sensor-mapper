@@ -11,9 +11,9 @@ spec:
     protocolName: modbus
     configData:
       communicateMode: "TCP"   #TCP/RTU
-      port: "30502"             # replace the port with your modbus device port
+      port: "5502"             # replace the port with your modbus device port
       slaveID: 1
-      ip: "172.18.0.3"   # 1.replace the ip with your modbus device ip
+      ip: "127.0.0.1"   # 1.replace the ip with your modbus device ip
   nodeName: "kind-worker" # 2.replace the nodeName with your edge node name
   #属性
   properties:
@@ -28,8 +28,8 @@ spec:
           scale: 0.1 # 温度值的缩放因子
           isSwap: false  # 不交换字节
           isRegisterSwap: false # 不交换寄存器
-          Max: 100.0
-          Min: 0
+          max: 100.0
+          min: 1.0
       collectCycle: 10000
       reportCycle: 10000
       reportToCloud: true

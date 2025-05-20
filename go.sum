@@ -99,6 +99,9 @@ github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsT
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/taosdata/driver-go/v3 v3.5.1 h1:ln8gLJ6HR6gHU6dodmOa9utUjPUpAcdIplh6arFO26Q=
 github.com/taosdata/driver-go/v3 v3.5.1/go.mod h1:H2vo/At+rOPY1aMzUV9P49SVX7NlXb3LAbKw+MCLrmU=
+github.com/thinkgos/gomodbus v1.5.2 h1:zmFEzXILpCtBYB8FwcAuLnb8Rrr3NcdX8oukmyB9hwE=
+github.com/thinkgos/gomodbus v1.5.2/go.mod h1:HX6B+W3xV/oKinltblD+aqr9LnQuh9mWT4kMul5hYvE=
+github.com/thinkgos/timing v1.1.2/go.mod h1:zS1qzRn2ISTjI1xJc6AHNfWAvCtc7FylwWjt32L8qvo=
 go.opentelemetry.io/otel v1.23.0 h1:Df0pqjqExIywbMCMTxkAwzjLZtRf+bBKLbUcpxO2C9E=
 go.opentelemetry.io/otel v1.23.0/go.mod h1:YCycw9ZeKhcJFrb34iVSkyT0iczq/zYDtZYFufObyB0=
 go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v1.23.0 h1:Lc6m+ytInMOSdTOGl+Y4qPzTlZ7QPb0pL+1JuUEt4Ao=
