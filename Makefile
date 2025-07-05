@@ -63,3 +63,7 @@ deploy-crds:
 	kubectl apply -f./crds/temperature-model.yaml
 	kubectl apply -f./crds/temperature-instance.yaml
 
+deploy-mqtt:
+	kubectl apply -f./resource/mqtt.yaml
+undeploy-mqtt:
+	kubectl delete -f./resource/mqtt.yaml

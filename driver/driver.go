@@ -20,7 +20,7 @@ func NewClient(protocol ProtocolConfig) (*CustomizedClient, error) {
 	return client, nil
 }
 
-// InitDevice 初始化设备
+// InitDevice:init modbus client
 func (c *CustomizedClient) InitDevice() error {
 	// TODO: add init operation
 	// you can use c.ProtocolConfig
@@ -65,7 +65,7 @@ func (c *CustomizedClient) InitDevice() error {
 	return nil
 }
 
-// GetDeviceData 获取设备数据并转换类型输出
+// GetDeviceData :get data from modbus client and normalize data
 func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, error) {
 	c.deviceMutex.Lock()
 	defer c.deviceMutex.Unlock()
@@ -110,12 +110,12 @@ func (c *CustomizedClient) GetDeviceData(visitor *VisitorConfig) (interface{}, e
 	return out, err
 }
 
-// 根据scale缩小
+// ZoomIn: zoom in data
 func ZoomIn(data uint16, scale float64) float64 {
 	return cast.ToFloat64(data) * scale
 }
 
-// 根据scale放大
+// ZoomOut: zoom out data
 func ZoomOut(data float64, scale float64) uint16 {
 	if scale == 0 {
 		return 0
@@ -123,7 +123,7 @@ func ZoomOut(data float64, scale float64) uint16 {
 	return cast.ToUint16(data / scale)
 }
 
-// DataNormalize 规范化数据类型转换
+// DataNormalize
 func DataNormalize(data interface{}, visitor *VisitorConfig) (interface{}, error) {
 
 	switch visitor.DataType {

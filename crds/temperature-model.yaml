@@ -7,7 +7,7 @@ spec:
   properties:
     - name: temperature 
       description: actual temperature *10 
-      type: FLOAT   # 规范化内部数据类型，ENUM: INT,FLOAT,DOUBLE,STRING,BOOLEAN,BYTES
+      type: FLOAT   # ENUM: INT,FLOAT,DOUBLE,STRING,BOOLEAN,BYTES
       accessMode: ReadWrite
       minimum: "0"  
       maximum: "100.0"  
